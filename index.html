@@ -2,11 +2,11 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Calcul de moyenne</title>
+<title>Calcul de moyenne en temps réel</title>
 <style>
 body { font-family: Arial, sans-serif; background:white; }
 .global-controls { margin-bottom: 20px; display: flex; align-items: center; flex-wrap: wrap; gap:10px; }
-.global-controls button, .global-controls label { margin-right: 10px; }
+.global-controls button, .global-controls label { margin-right: 10px; cursor: pointer; }
 #matieres-container { display: flex; flex-direction: column; gap: 20px; }
 .matiere { margin-bottom: 20px; padding: 10px; border: 1px solid #ccc; width: 400px; box-sizing:border-box; }
 .matiere input { margin-top: 5px; }
@@ -16,6 +16,8 @@ body { font-family: Arial, sans-serif; background:white; }
 .notes-hidden input { display: none !important; }
 .notes-hidden .label-ds, .notes-hidden .label-tests { display: none !important; }
 .compteur { font-size: 0.9em; color: #555; margin-left: 10px; }
+.display-btn { padding:5px 10px; border:1px solid #ccc; background:#f0f0f0; margin-right:5px; cursor:pointer; }
+.display-btn.active { background:#ccc; }
 </style>
 </head>
 <body>
@@ -23,20 +25,19 @@ body { font-family: Arial, sans-serif; background:white; }
 <h1>Calcul de moyenne</h1>
 
 <div class="global-controls">
-    <label><input type="checkbox" id="toggle-coefs"> Afficher coefficients</label>
-    <label><input type="checkbox" id="toggle-nb-notes"> Afficher nombre de notes</label>
-    <label><input type="checkbox" id="toggle-notes"> Masquer toutes les notes</label>
+    <label><input type="checkbox" id="toggle-coefs"> Coeffs</label>
+    <label><input type="checkbox" id="toggle-nb-notes"> Nb notes</label>
+    <label><input type="checkbox" id="toggle-notes"> Masquer tout</label>
     <button id="supprimer-tout">Tout supprimer</button>
-    <label><input type="checkbox" id="toggle-bg"> Fond dégradé selon moyenne générale</label>
-    <label>Affichage :
-        <input type="range" id="display-mode" min="0" max="1" step="1" value="0">
-        <span id="display-text">Ligne</span>
-    </label>
+    <label><input type="checkbox" id="toggle-bg"> Couleur</label>
+    <span>
+        <span id="btn-ligne" class="display-btn active">Ligne</span>
+        <span id="btn-grille" class="display-btn">Grille</span>
+    </span>
 </div>
 
 <div id="matieres-container"></div>
 
-<button onclick="calculerMoyenne()">Calculer la moyenne générale</button>
 <h2 id="resultat"></h2>
 
 <script>
@@ -54,7 +55,7 @@ const matieres = [
 
 const container = document.getElementById("matieres-container");
 
-// Génération dynamique
+// --- Génération des matières ---
 matieres.forEach(m=>{
     const div = document.createElement("div");
     div.className="matiere";
@@ -81,7 +82,7 @@ matieres.forEach(m=>{
     container.appendChild(div);
 });
 
-// --- Ajouter / supprimer note ---
+// --- Ajouter / supprimer notes ---
 function ajouterNote(id){
     const div=document.getElementById(id);
     const inputs=div.querySelectorAll("input");
@@ -94,6 +95,7 @@ function ajouterNote(id){
     div.appendChild(document.createElement("br"));
     div.appendChild(input);
     majCompteur(div);
+    majMoyenne(); 
 }
 
 function supprimerDerniere(id){
@@ -102,9 +104,10 @@ function supprimerDerniere(id){
     if(inputs.length<=1){inputs[0].value="";} 
     else {div.removeChild(inputs[inputs.length-1].previousSibling); div.removeChild(inputs[inputs.length-1]);}
     majCompteur(div);
+    majMoyenne();
 }
 
-// --- Compteur de notes ---
+// --- Compteur ---
 function majCompteur(div){
     const compteur = div.parentNode.querySelector(".nb-notes");
     const inputs = div.querySelectorAll("input");
@@ -113,7 +116,7 @@ function majCompteur(div){
     compteur.textContent=`[${nb}]`;
 }
 
-// --- Calculs de moyennes ---
+// --- Moyennes ---
 function moyenneMatiere(id){
     const inputs=document.querySelectorAll(`#${id} input`);
     let somme=0,count=0;
@@ -125,9 +128,7 @@ function moyenneMaths(){
     const mTests=moyenneMatiere("maths-tests");
     return (mCont + mTests/6)/(1+1/6);
 }
-
-// --- Calcul moyenne générale ---
-function calculerMoyenne(){
+function majMoyenne(){
     let mg=7*moyenneMaths()+
            7*moyenneMatiere("physique-notes")+
            4*moyenneMatiere("chimie-notes")+
@@ -138,9 +139,7 @@ function calculerMoyenne(){
            1.5*moyenneMatiere("anglais-notes")+
            1.5*moyenneMatiere("sport-notes");
     mg/=30;
-    const resElt=document.getElementById("resultat");
-    resElt.textContent="Moyenne générale : "+mg.toFixed(2);
-    resElt.style.display="block";
+    document.getElementById("resultat").textContent="Moyenne générale : "+mg.toFixed(2);
     if(document.getElementById("toggle-bg").checked) colorerFondGlobal(mg);
 }
 
@@ -169,7 +168,7 @@ document.getElementById("supprimer-tout").addEventListener("click",function(){
     document.body.style.background="white";
 });
 
-// --- Fond dégradé global ---
+// --- Couleur instantanée ---
 function colorerFondGlobal(moyenne){
     moyenne=Math.max(0,Math.min(20,moyenne));
     let r,g,b;
@@ -187,33 +186,31 @@ function colorerFondGlobal(moyenne){
     document.body.style.background=`rgb(${r},${g},${b})`;
 }
 
-// --- Affichage grille / ligne ---
-document.getElementById("display-mode").addEventListener("input",function(){
-    const val=this.value;
-    const text=document.getElementById("display-text");
-    if(val==0){
-        container.style.flexDirection="column";
-        container.style.flexWrap="nowrap";
-        container.querySelectorAll(".matiere").forEach(m=>m.style.width="400px");
-        text.textContent="Ligne";
-    } else {
-        container.style.flexDirection="row";
-        container.style.flexWrap="wrap";
-        container.querySelectorAll(".matiere").forEach(m=>m.style.width="30%");
-        text.textContent="Grille";
-    }
+// --- Affichage Ligne / Grille (boutons exclusifs) ---
+const btnLigne=document.getElementById("btn-ligne");
+const btnGrille=document.getElementById("btn-grille");
+btnLigne.addEventListener("click",()=>{
+    btnLigne.classList.add("active");
+    btnGrille.classList.remove("active");
+    container.style.flexDirection="column";
+    container.style.flexWrap="nowrap";
+    container.querySelectorAll(".matiere").forEach(m=>m.style.width="400px");
+});
+btnGrille.addEventListener("click",()=>{
+    btnGrille.classList.add("active");
+    btnLigne.classList.remove("active");
+    container.style.flexDirection="row";
+    container.style.flexWrap="wrap";
+    container.querySelectorAll(".matiere").forEach(m=>m.style.width="30%");
 });
 
-// --- Initialisation compteurs et boutons (toujours visibles après 1ère note) ---
+// --- Initialisation compteurs et boutons visibles ---
 document.querySelectorAll(".matiere div[id]").forEach(div=>{
     div.querySelectorAll("input").forEach(i=>i.addEventListener("input",()=>{
         majCompteur(div);
-        if(document.getElementById("toggle-bg").checked) calculerMoyenne();
+        majMoyenne();
     }));
     majCompteur(div);
-    // Rendre les boutons + et corbeille visibles dès la 1ère note
-    const boutons = Array.from(div.parentNode.querySelectorAll(".bouton-ajouter, .bouton-supprimer"));
-    boutons.forEach(b=>b.style.display="inline-block");
 });
 </script>
 
