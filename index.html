@@ -4,11 +4,12 @@
 <meta charset="UTF-8">
 <title>Calcul de moyenne</title>
 <style>
-body { font-family: Arial, sans-serif; }
-.matiere { margin-bottom: 20px; padding: 10px; border: 1px solid #ccc; width: 400px; position: relative; transition: background 0.5s; }
+body { font-family: Arial, sans-serif; transition: background 1s; }
+.matiere { margin-bottom: 20px; padding: 10px; border: 1px solid #ccc; width: 400px; position: relative; }
 .bouton-ajouter, .bouton-supprimer { margin-top: 5px; margin-right: 5px; }
 .coef { font-weight: bold; display: none; }
 .notes-hidden input { display: none; }
+.notes-hidden .label-ds, .notes-hidden .label-tests { display: none; }
 .global-controls { margin-bottom: 20px; }
 .global-controls button, .global-controls label { margin-right: 10px; }
 .compteur { font-size: 0.9em; color: #555; margin-left: 10px; }
@@ -22,7 +23,7 @@ body { font-family: Arial, sans-serif; }
     <label><input type="checkbox" id="toggle-coefs"> Afficher coefficients</label>
     <label><input type="checkbox" id="toggle-notes"> Masquer toutes les notes</label>
     <button id="supprimer-tout">Tout supprimer</button>
-    <label><input type="checkbox" id="toggle-bg"> Fond dégradé selon moyenne</label>
+    <label><input type="checkbox" id="toggle-bg"> Fond dégradé selon moyenne générale</label>
 </div>
 
 <div id="matieres-container"></div>
@@ -54,11 +55,13 @@ matieres.forEach(m=>{
 
     let html=`<h3>${m.nom} <span class="coef">(coef ${m.coef})</span> <span class="compteur">nb note: 0</span></h3>`;
     if(m.ds){
-        html+=`<strong>DS</strong><div id="${m.id}-controles"><input type="number" min="0" max="20"></div>
+        html+=`<strong class="label-ds">DS</strong>
+               <div id="${m.id}-controles"><input type="number" min="0" max="20"></div>
                <button class="bouton-ajouter" onclick="ajouterNote('${m.id}-controles')" style="display:none;">+</button>
                <button class="bouton-supprimer" onclick="supprimerDerniere('${m.id}-controles')" style="display:none;">🗑</button>
                <br><br>
-               <strong>Tests</strong><div id="${m.id}-tests"><input type="number" min="0" max="5"></div>
+               <strong class="label-tests">Tests</strong>
+               <div id="${m.id}-tests"><input type="number" min="0" max="5"></div>
                <button class="bouton-ajouter" onclick="ajouterNote('${m.id}-tests')" style="display:none;">+</button>
                <button class="bouton-supprimer" onclick="supprimerDerniere('${m.id}-tests')" style="display:none;">🗑</button>`;
     } else {
@@ -140,7 +143,7 @@ function calculerMoyenne(){
     const resElt=document.getElementById("resultat");
     resElt.textContent="Moyenne générale : "+mg.toFixed(2);
     resElt.style.display="block";
-    if(document.getElementById("toggle-bg").checked) colorerFond();
+    if(document.getElementById("toggle-bg").checked) colorerFondGlobal(mg);
 }
 
 // --- Boutons globaux ---
@@ -149,9 +152,11 @@ document.getElementById("toggle-coefs").addEventListener("change",function(){
 });
 document.getElementById("toggle-notes").addEventListener("change",function(){
     document.querySelectorAll(".matiere div[id]").forEach(d=>d.classList.toggle("notes-hidden",this.checked));
+    // Masquer DS / Tests de Maths
+    document.querySelectorAll(".label-ds, .label-tests").forEach(e=>e.style.display=this.checked?"none":"inline");
     const res=document.getElementById("resultat");
     res.style.display=this.checked?"none":"block";
-    if(this.checked) document.querySelectorAll(".matiere").forEach(d=>d.style.background="white");
+    if(this.checked) document.body.style.background="white";
 });
 document.getElementById("supprimer-tout").addEventListener("click",function(){
     if(!confirm("Voulez-vous vraiment supprimer toutes les notes ?")) return;
@@ -160,39 +165,34 @@ document.getElementById("supprimer-tout").addEventListener("click",function(){
     document.querySelectorAll(".bouton-ajouter, .bouton-supprimer").forEach(b=>b.style.display="none");
     document.querySelectorAll(".compteur").forEach(c=>c.textContent="nb note: 0");
     document.getElementById("resultat").textContent="";
-    document.querySelectorAll(".matiere").forEach(d=>d.style.background="white");
+    document.body.style.background="white";
 });
 document.getElementById("toggle-bg").addEventListener("change",function(){
-    if(this.checked) colorerFond();
-    else document.querySelectorAll(".matiere").forEach(d=>d.style.background="white");
+    if(this.checked) {
+        const mg = parseFloat(document.getElementById("resultat").textContent.split(": ")[1]) || 0;
+        colorerFondGlobal(mg);
+    } else {
+        document.body.style.background="white";
+    }
 });
 
-// --- Fond dégradé fluide ---
-function colorerFond(){
-    matieres.forEach(m=>{
-        let moyenne = m.ds ? moyenneMaths() : moyenneMatiere(`${m.id}-notes`);
-        const div=document.getElementById(m.id);
-        const couleur = noteToColorSmooth(moyenne);
-        div.style.transition="background 1s";
-        div.style.background=couleur;
-    });
-}
-
-function noteToColorSmooth(note){
-    note=Math.max(0,Math.min(20,note));
+// --- Fond dégradé global ---
+function colorerFondGlobal(moyenne){
+    moyenne=Math.max(0,Math.min(20,moyenne));
     let r,g,b;
-    if(note<=10){
-        let t=note/10;
+    if(moyenne<=10){
+        let t=moyenne/10;
         r=Math.round(255*(1-t));
         g=Math.round(255*t);
         b=0;
     } else {
-        let t=(note-10)/10;
+        let t=(moyenne-10)/10;
         r=0;
         g=Math.round(255*(1-t));
         b=Math.round(255*t);
     }
-    return `rgb(${r},${g},${b})`;
+    document.body.style.transition="background 1s";
+    document.body.style.background=`rgb(${r},${g},${b})`;
 }
 
 // --- Initialisation boutons et compteurs ---
@@ -200,7 +200,9 @@ document.querySelectorAll(".matiere div[id]").forEach(div=>{
     div.querySelectorAll("input").forEach(i=>i.addEventListener("input",()=>{
         majBoutons(div);
         majCompteur(div);
-        if(document.getElementById("toggle-bg").checked) colorerFond();
+        if(document.getElementById("toggle-bg").checked) {
+            calculerMoyenne(); // recalcul + fond global
+        }
     }));
     majBoutons(div);
     majCompteur(div);
@@ -209,24 +211,6 @@ document.querySelectorAll(".matiere div[id]").forEach(div=>{
 
 </body>
 </html>
- b=Math.round(255*t);
-    }
-    return `rgb(${r},${g},${b})`;
-}
 
-// --- Initialisation boutons et compteurs ---
-document.querySelectorAll(".matiere div[id]").forEach(div=>{
-    div.querySelectorAll("input").forEach(i=>i.addEventListener("input",()=>{
-        majBoutons(div);
-        majCompteur(div);
-        if(document.getElementById("toggle-bg").checked) colorerFond();
-    }));
-    majBoutons(div);
-    majCompteur(div);
-});
-</script>
-
-</body>
-</html>
 
 
