@@ -4,11 +4,11 @@
 <meta charset="UTF-8">
 <title>Calcul de moyenne en temps réel</title>
 <style>
-body { font-family: Arial, sans-serif; background:white; transition: background 0s; }
+body { font-family: Arial, sans-serif; background:white; transition: background 0.2s; }
 .global-controls { margin-bottom: 20px; display: flex; align-items: center; flex-wrap: wrap; gap:10px; opacity:1; transition: opacity 0.2s; }
-.global-controls button, .global-controls label { margin-right: 10px; cursor: pointer; }
-#matieres-container { display: flex; flex-direction: column; gap: 20px; flex-wrap: wrap; }
-.matiere { margin-bottom: 20px; padding: 10px; border: 1px solid #ccc; box-sizing:border-box; opacity:1; transition: opacity 0.2s; }
+.global-controls button, .global-controls label, .display-btn { margin-right: 10px; cursor: pointer; }
+#matieres-container { display: flex; flex-direction: column; gap: 20px; flex-wrap: wrap; transition: all 0.2s; }
+.matiere { margin-bottom: 20px; padding: 10px; border: 1px solid #ccc; box-sizing:border-box; opacity:1; transition: all 0.2s; }
 .matiere input { margin-top: 5px; }
 .bouton-ajouter, .bouton-supprimer { margin-top: 5px; margin-right: 5px; display:none; }
 .coef { font-weight: bold; display: none; }
@@ -16,22 +16,13 @@ body { font-family: Arial, sans-serif; background:white; transition: background 
 .notes-hidden input { display: none !important; }
 .notes-hidden .label-ds, .notes-hidden .label-tests { display: none !important; }
 .compteur { font-size: 0.9em; color: #555; margin-left: 10px; }
-.display-btn { padding:5px 10px; border:1px solid #ccc; background:#f0f0f0; margin-right:5px; cursor:pointer; }
+.display-btn { padding:5px 10px; border:1px solid #ccc; background:#f0f0f0; cursor:pointer; user-select:none; }
 .display-btn.active { background:#ccc; }
 h1 { opacity:1; transition: opacity 0.2s; }
-@media (min-width: 1200px) {
-  #matieres-container { flex-direction: row; justify-content: flex-start; }
-  .matiere { width: calc(25% - 20px); } /* 4 par ligne */
-}
-@media (min-width: 900px) and (max-width: 1199px) {
-  .matiere { width: calc(33% - 20px); } /* 3 par ligne */
-}
-@media (min-width: 600px) and (max-width: 899px) {
-  .matiere { width: calc(50% - 20px); } /* 2 par ligne */
-}
-@media (max-width: 599px) {
-  .matiere { width: 100%; } /* 1 par ligne */
-}
+@media (min-width: 1200px) { .matiere.grille { width: calc(25% - 20px); } }
+@media (min-width: 900px) and (max-width: 1199px) { .matiere.grille { width: calc(33% - 20px); } }
+@media (min-width: 600px) and (max-width: 899px) { .matiere.grille { width: calc(50% - 20px); } }
+@media (max-width: 599px) { .matiere.grille { width: 100%; } }
 </style>
 </head>
 <body>
@@ -42,12 +33,9 @@ h1 { opacity:1; transition: opacity 0.2s; }
     <label><input type="checkbox" id="toggle-coefs"> Coeffs</label>
     <label><input type="checkbox" id="toggle-nb-notes"> Nb notes</label>
     <label><input type="checkbox" id="toggle-notes"> Masquer</label>
-    <button id="supprimer-tout">Tout supprimer</button>
+    <label><input type="checkbox" id="vider"> Vider</label>
     <label><input type="checkbox" id="toggle-bg"> Couleur</label>
-    <span>
-        <span id="btn-ligne" class="display-btn active">Ligne</span>
-        <span id="btn-grille" class="display-btn">Grille</span>
-    </span>
+    <span id="display-mode" class="display-btn active">Ligne</span>
 </div>
 
 <div id="matieres-container"></div>
@@ -178,31 +166,30 @@ document.getElementById("toggle-nb-notes").addEventListener("change",function(){
     document.querySelectorAll(".nb-notes").forEach(c=>c.style.display=this.checked?"inline":"none");
 });
 
-// Masquer / Afficher
-document.getElementById("toggle-notes").addEventListener("change",function(){
+// --- Masquer / Afficher ---
+const toggleNotes=document.getElementById("toggle-notes");
+toggleNotes.addEventListener("change",function(){
     const hide=this.checked;
-    this.parentNode.textContent=hide?"Afficher":"Masquer";
-    const opBloc=hide?0.4:1;
-    const titre=document.getElementById("titre-principal");
-    titre.style.opacity=hide?0.6:1;
-    document.getElementById("global-controls").style.opacity=opBloc;
+    this.parentNode.childNodes[1].textContent=hide?"Afficher":"Masquer";
     document.querySelectorAll(".matiere").forEach(d=>{
         d.classList.toggle("notes-hidden",hide);
-        d.style.opacity=opBloc;
-        d.style.height="auto";
+        d.style.opacity=1; // Toujours 1
     });
     document.getElementById("resultat").style.display=hide?"none":"block";
-    if(hide) document.body.style.background="white";
 });
 
-// Supprimer tout
-document.getElementById("supprimer-tout").addEventListener("click",function(){
-    document.querySelectorAll(".matiere div[id] input").forEach(i=>i.value="");
-    document.querySelectorAll(".matiere div[id] br").forEach(br=>br.remove());
-    document.querySelectorAll(".nb-notes").forEach(c=>c.textContent="[0]");
-    document.querySelectorAll(".bouton-ajouter, .bouton-supprimer").forEach(b=>b.style.display="none");
-    document.getElementById("resultat").textContent="";
-    document.body.style.background="white";
+// --- Vider (case à cocher) ---
+const vider=document.getElementById("vider");
+vider.addEventListener("change",function(){
+    if(this.checked){
+        document.querySelectorAll(".matiere div[id] input").forEach(i=>i.value="");
+        document.querySelectorAll(".matiere div[id] br").forEach(br=>br.remove());
+        document.querySelectorAll(".nb-notes").forEach(c=>c.textContent="[0]");
+        document.querySelectorAll(".bouton-ajouter, .bouton-supprimer").forEach(b=>b.style.display="none");
+        document.getElementById("resultat").textContent="";
+        document.body.style.background="white";
+        this.checked=false;
+    }
 });
 
 // --- Couleur instantanée ---
@@ -223,22 +210,23 @@ function colorerFondGlobal(moyenne){
     document.body.style.background=`rgb(${r},${g},${b})`;
 }
 
-// --- Affichage Ligne / Grille (boutons exclusifs) ---
-const btnLigne=document.getElementById("btn-ligne");
-const btnGrille=document.getElementById("btn-grille");
-btnLigne.addEventListener("click",()=>{
-    btnLigne.classList.add("active");
-    btnGrille.classList.remove("active");
-    container.style.flexDirection="column";
-    container.style.flexWrap="nowrap";
-    container.querySelectorAll(".matiere").forEach(m=>m.style.width="400px");
-});
-btnGrille.addEventListener("click",()=>{
-    btnGrille.classList.add("active");
-    btnLigne.classList.remove("active");
-    container.style.flexDirection="row";
-    container.style.flexWrap="wrap";
-    container.querySelectorAll(".matiere").forEach(m=>m.style.width="calc(25% - 20px)"); 
+// --- Ligne / Grille (un seul bouton qui change) ---
+const displayBtn=document.getElementById("display-mode");
+let isLigne=true;
+displayBtn.addEventListener("click",()=>{
+    isLigne=!isLigne;
+    displayBtn.textContent=isLigne?"Ligne":"Grille";
+    container.style.flexDirection=isLigne?"column":"row";
+    container.style.flexWrap=isLigne?"nowrap":"wrap";
+    container.querySelectorAll(".matiere").forEach(m=>{
+        if(isLigne){ 
+            m.style.width="400px"; 
+            m.classList.remove("grille");
+        } else {
+            m.classList.add("grille");
+            m.style.width=""; // largeur gérée par CSS
+        }
+    });
 });
 
 // --- Initialisation des compteurs et boutons visibles ---
