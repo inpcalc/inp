@@ -11,7 +11,7 @@
             margin-bottom: 20px;
             padding: 10px;
             border: 1px solid #ccc;
-            width: 300px;
+            width: 350px;
         }
         button {
             margin-top: 5px;
@@ -22,14 +22,26 @@
 
 <h1>Calcul de moyenne</h1>
 
+<!-- MATHS -->
 <div class="matiere">
     <h3>Maths (coef 7)</h3>
-    <div id="maths">
+
+    <strong>Contrôles</strong>
+    <div id="maths-controles">
         <input type="number" min="0" max="20">
     </div>
-    <button onclick="ajouterNote('maths')">+</button>
+    <button onclick="ajouterNote('maths-controles')">+</button>
+
+    <br><br>
+
+    <strong>Tests</strong>
+    <div id="maths-tests">
+        <input type="number" min="0" max="20">
+    </div>
+    <button onclick="ajouterNote('maths-tests')">+</button>
 </div>
 
+<!-- PHYSIQUE -->
 <div class="matiere">
     <h3>Physique (coef 7)</h3>
     <div id="physique">
@@ -38,6 +50,7 @@
     <button onclick="ajouterNote('physique')">+</button>
 </div>
 
+<!-- CHIMIE -->
 <div class="matiere">
     <h3>Chimie (coef 4)</h3>
     <div id="chimie">
@@ -46,6 +59,7 @@
     <button onclick="ajouterNote('chimie')">+</button>
 </div>
 
+<!-- BIOLOGIE -->
 <div class="matiere">
     <h3>Biologie (coef 3)</h3>
     <div id="biologie">
@@ -54,6 +68,7 @@
     <button onclick="ajouterNote('biologie')">+</button>
 </div>
 
+<!-- INFO -->
 <div class="matiere">
     <h3>Info (coef 3)</h3>
     <div id="info">
@@ -62,6 +77,7 @@
     <button onclick="ajouterNote('info')">+</button>
 </div>
 
+<!-- CULTURE G -->
 <div class="matiere">
     <h3>Culture G (coef 1.5)</h3>
     <div id="cultureg">
@@ -70,6 +86,7 @@
     <button onclick="ajouterNote('cultureg')">+</button>
 </div>
 
+<!-- LV2 -->
 <div class="matiere">
     <h3>LV2 (coef 1.5)</h3>
     <div id="LV2">
@@ -78,6 +95,7 @@
     <button onclick="ajouterNote('LV2')">+</button>
 </div>
 
+<!-- ANGLAIS -->
 <div class="matiere">
     <h3>Anglais (coef 1.5)</h3>
     <div id="anglais">
@@ -86,6 +104,7 @@
     <button onclick="ajouterNote('anglais')">+</button>
 </div>
 
+<!-- SPORT -->
 <div class="matiere">
     <h3>Sport (coef 1.5)</h3>
     <div id="sport">
@@ -99,16 +118,27 @@
 <h2 id="resultat"></h2>
 
 <script>
+    // Ajout d'une nouvelle note seulement si la dernière est remplie
     function ajouterNote(matiereId) {
         let div = document.getElementById(matiereId);
+        let inputs = div.querySelectorAll("input");
+        let dernierInput = inputs[inputs.length - 1];
+
+        if (dernierInput.value === "") {
+            alert("Veuillez entrer la note avant d'en ajouter une autre.");
+            return;
+        }
+
         let input = document.createElement("input");
         input.type = "number";
         input.min = 0;
         input.max = 20;
+
         div.appendChild(document.createElement("br"));
         div.appendChild(input);
     }
 
+    // Moyenne d'une matière classique
     function moyenneMatiere(matiereId) {
         let inputs = document.querySelectorAll(`#${matiereId} input`);
         let somme = 0;
@@ -125,9 +155,19 @@
         return count > 0 ? somme / count : 0;
     }
 
+    // Moyenne de Maths avec pondération Tests = 1/6 des Contrôles
+    function moyenneMaths() {
+        let moyenneControles = moyenneMatiere("maths-controles");
+        let moyenneTests = moyenneMatiere("maths-tests");
+
+        // Pondération : Tests = 1/6 des contrôles
+        return (moyenneControles + (moyenneTests / 6)) / (1 + 1/6);
+    }
+
+    // Calcul de la moyenne générale
     function calculerMoyenne() {
         let moyenneGenerale = (
-            7 * moyenneMatiere("maths") +
+            7 * moyenneMaths() +
             7 * moyenneMatiere("physique") +
             4 * moyenneMatiere("chimie") +
             3 * moyenneMatiere("biologie") +
@@ -145,4 +185,3 @@
 
 </body>
 </html>
-
