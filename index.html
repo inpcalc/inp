@@ -4,13 +4,13 @@
 <meta charset="UTF-8">
 <title>Calcul de moyenne en temps réel</title>
 <style>
-body { font-family: Arial, sans-serif; background:white; }
-.global-controls { margin-bottom: 20px; display: flex; align-items: center; flex-wrap: wrap; gap:10px; }
+body { font-family: Arial, sans-serif; background:white; transition: background 0s; }
+.global-controls { margin-bottom: 20px; display: flex; align-items: center; flex-wrap: wrap; gap:10px; opacity:1; transition: opacity 0.2s; }
 .global-controls button, .global-controls label { margin-right: 10px; cursor: pointer; }
-#matieres-container { display: flex; flex-direction: column; gap: 20px; }
-.matiere { margin-bottom: 20px; padding: 10px; border: 1px solid #ccc; width: 400px; box-sizing:border-box; }
+#matieres-container { display: flex; flex-direction: column; gap: 20px; flex-wrap: wrap; }
+.matiere { margin-bottom: 20px; padding: 10px; border: 1px solid #ccc; box-sizing:border-box; opacity:1; transition: opacity 0.2s; }
 .matiere input { margin-top: 5px; }
-.bouton-ajouter, .bouton-supprimer { margin-top: 5px; margin-right: 5px; display:inline-block; }
+.bouton-ajouter, .bouton-supprimer { margin-top: 5px; margin-right: 5px; display:none; }
 .coef { font-weight: bold; display: none; }
 .nb-notes { font-weight: normal; color: #555; display: none; margin-left: 5px; }
 .notes-hidden input { display: none !important; }
@@ -18,16 +18,30 @@ body { font-family: Arial, sans-serif; background:white; }
 .compteur { font-size: 0.9em; color: #555; margin-left: 10px; }
 .display-btn { padding:5px 10px; border:1px solid #ccc; background:#f0f0f0; margin-right:5px; cursor:pointer; }
 .display-btn.active { background:#ccc; }
+h1 { opacity:1; transition: opacity 0.2s; }
+@media (min-width: 1200px) {
+  #matieres-container { flex-direction: row; justify-content: flex-start; }
+  .matiere { width: calc(25% - 20px); } /* 4 par ligne */
+}
+@media (min-width: 900px) and (max-width: 1199px) {
+  .matiere { width: calc(33% - 20px); } /* 3 par ligne */
+}
+@media (min-width: 600px) and (max-width: 899px) {
+  .matiere { width: calc(50% - 20px); } /* 2 par ligne */
+}
+@media (max-width: 599px) {
+  .matiere { width: 100%; } /* 1 par ligne */
+}
 </style>
 </head>
 <body>
 
-<h1>Calcul de moyenne</h1>
+<h1 id="titre-principal">Calcul de moyenne</h1>
 
-<div class="global-controls">
+<div class="global-controls" id="global-controls">
     <label><input type="checkbox" id="toggle-coefs"> Coeffs</label>
     <label><input type="checkbox" id="toggle-nb-notes"> Nb notes</label>
-    <label><input type="checkbox" id="toggle-notes"> Masquer tout</label>
+    <label><input type="checkbox" id="toggle-notes"> Masquer</label>
     <button id="supprimer-tout">Tout supprimer</button>
     <label><input type="checkbox" id="toggle-bg"> Couleur</label>
     <span>
@@ -96,6 +110,7 @@ function ajouterNote(id){
     div.appendChild(input);
     majCompteur(div);
     majMoyenne(); 
+    majBoutons(div);
 }
 
 function supprimerDerniere(id){
@@ -105,6 +120,16 @@ function supprimerDerniere(id){
     else {div.removeChild(inputs[inputs.length-1].previousSibling); div.removeChild(inputs[inputs.length-1]);}
     majCompteur(div);
     majMoyenne();
+    majBoutons(div);
+}
+
+// --- Boutons visibles uniquement si au moins une note ---
+function majBoutons(div){
+    const inputs=div.querySelectorAll("input");
+    const boutons=div.querySelectorAll(".bouton-ajouter, .bouton-supprimer");
+    let anyFilled=false;
+    inputs.forEach(i=>{if(i.value!=="") anyFilled=true;});
+    boutons.forEach(b=>b.style.display=anyFilled?"inline-block":"none");
 }
 
 // --- Compteur ---
@@ -139,7 +164,9 @@ function majMoyenne(){
            1.5*moyenneMatiere("anglais-notes")+
            1.5*moyenneMatiere("sport-notes");
     mg/=30;
-    document.getElementById("resultat").textContent="Moyenne générale : "+mg.toFixed(2);
+    const resElt=document.getElementById("resultat");
+    resElt.textContent="Moyenne générale : "+mg.toFixed(2);
+    resElt.style.display="block";
     if(document.getElementById("toggle-bg").checked) colorerFondGlobal(mg);
 }
 
@@ -150,20 +177,30 @@ document.getElementById("toggle-coefs").addEventListener("change",function(){
 document.getElementById("toggle-nb-notes").addEventListener("change",function(){
     document.querySelectorAll(".nb-notes").forEach(c=>c.style.display=this.checked?"inline":"none");
 });
+
+// Masquer / Afficher
 document.getElementById("toggle-notes").addEventListener("change",function(){
-    const hide = this.checked;
+    const hide=this.checked;
+    this.parentNode.textContent=hide?"Afficher":"Masquer";
+    const opBloc=hide?0.4:1;
+    const titre=document.getElementById("titre-principal");
+    titre.style.opacity=hide?0.6:1;
+    document.getElementById("global-controls").style.opacity=opBloc;
     document.querySelectorAll(".matiere").forEach(d=>{
         d.classList.toggle("notes-hidden",hide);
-        d.style.height="auto"; // uniformisation
+        d.style.opacity=opBloc;
+        d.style.height="auto";
     });
-    document.querySelectorAll(".label-ds, .label-tests").forEach(e=>e.style.display=hide?"none":"inline");
     document.getElementById("resultat").style.display=hide?"none":"block";
-    document.body.style.background="white";
+    if(hide) document.body.style.background="white";
 });
+
+// Supprimer tout
 document.getElementById("supprimer-tout").addEventListener("click",function(){
     document.querySelectorAll(".matiere div[id] input").forEach(i=>i.value="");
     document.querySelectorAll(".matiere div[id] br").forEach(br=>br.remove());
     document.querySelectorAll(".nb-notes").forEach(c=>c.textContent="[0]");
+    document.querySelectorAll(".bouton-ajouter, .bouton-supprimer").forEach(b=>b.style.display="none");
     document.getElementById("resultat").textContent="";
     document.body.style.background="white";
 });
@@ -201,19 +238,20 @@ btnGrille.addEventListener("click",()=>{
     btnLigne.classList.remove("active");
     container.style.flexDirection="row";
     container.style.flexWrap="wrap";
-    container.querySelectorAll(".matiere").forEach(m=>m.style.width="30%");
+    container.querySelectorAll(".matiere").forEach(m=>m.style.width="calc(25% - 20px)"); 
 });
 
-// --- Initialisation compteurs et boutons visibles ---
+// --- Initialisation des compteurs et boutons visibles ---
 document.querySelectorAll(".matiere div[id]").forEach(div=>{
     div.querySelectorAll("input").forEach(i=>i.addEventListener("input",()=>{
         majCompteur(div);
         majMoyenne();
+        majBoutons(div);
     }));
     majCompteur(div);
+    majBoutons(div);
 });
 </script>
 
 </body>
 </html>
-
