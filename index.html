@@ -1,37 +1,17 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <title>Calcul de moyenne</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
-        .matiere {
-            margin-bottom: 20px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            width: 400px;
-            position: relative;
-        }
-        .bouton-ajouter, .bouton-supprimer {
-            margin-top: 5px;
-            margin-right: 5px;
-        }
-        .coef {
-            font-weight: bold;
-            display: none;
-        }
-        .notes-hidden input {
-            display: none;
-        }
-        .global-controls {
-            margin-bottom: 20px;
-        }
-        .global-controls button, .global-controls label {
-            margin-right: 10px;
-        }
-    </style>
+<meta charset="UTF-8">
+<title>Calcul de moyenne</title>
+<style>
+    body { font-family: Arial, sans-serif; }
+    .matiere { margin-bottom: 20px; padding: 10px; border: 1px solid #ccc; width: 400px; position: relative; transition: background 0.5s; }
+    .bouton-ajouter, .bouton-supprimer { margin-top: 5px; margin-right: 5px; }
+    .coef { font-weight: bold; display: none; }
+    .notes-hidden input { display: none; }
+    .global-controls { margin-bottom: 20px; }
+    .global-controls button, .global-controls label { margin-right: 10px; }
+</style>
 </head>
 <body>
 
@@ -41,223 +21,164 @@
     <label><input type="checkbox" id="toggle-coefs"> Afficher coefficients</label>
     <label><input type="checkbox" id="toggle-notes"> Masquer toutes les notes</label>
     <button id="supprimer-tout">Tout supprimer</button>
+    <label><input type="checkbox" id="toggle-bg"> Fond dégradé selon moyenne</label>
 </div>
 
-<!-- EXEMPLE : Maths -->
-<div class="matiere" data-coef="7" id="maths">
-    <h3>Maths <span class="coef">(coef 7)</span></h3>
-
-    <strong>DS</strong>
-    <div id="maths-controles">
-        <input type="number" min="0" max="20">
-    </div>
-    <button class="bouton-ajouter" onclick="ajouterNote('maths-controles')" style="display:none;">+</button>
-    <button class="bouton-supprimer" onclick="supprimerDerniere('maths-controles')" style="display:none;">🗑</button>
-
-    <br><br>
-
-    <strong>Tests</strong>
-    <div id="maths-tests">
-        <input type="number" min="0" max="5">
-    </div>
-    <button class="bouton-ajouter" onclick="ajouterNote('maths-tests')" style="display:none;">+</button>
-    <button class="bouton-supprimer" onclick="supprimerDerniere('maths-tests')" style="display:none;">🗑</button>
-</div>
-
-<!-- PHYSIQUE -->
-<div class="matiere" data-coef="7" id="physique">
-    <h3>Physique <span class="coef">(coef 7)</span></h3>
-    <div id="physique-notes">
-        <input type="number" min="0" max="20">
-    </div>
-    <button class="bouton-ajouter" onclick="ajouterNote('physique-notes')" style="display:none;">+</button>
-    <button class="bouton-supprimer" onclick="supprimerDerniere('physique-notes')" style="display:none;">🗑</button>
-</div>
-
-<!-- CHIMIE -->
-<div class="matiere" data-coef="4" id="chimie">
-    <h3>Chimie <span class="coef">(coef 4)</span></h3>
-    <div id="chimie-notes">
-        <input type="number" min="0" max="20">
-    </div>
-    <button class="bouton-ajouter" onclick="ajouterNote('chimie-notes')" style="display:none;">+</button>
-    <button class="bouton-supprimer" onclick="supprimerDerniere('chimie-notes')" style="display:none;">🗑</button>
-</div>
-
-<!-- BIOLOGIE -->
-<div class="matiere" data-coef="3" id="biologie">
-    <h3>Biologie <span class="coef">(coef 3)</span></h3>
-    <div id="biologie-notes">
-        <input type="number" min="0" max="20">
-    </div>
-    <button class="bouton-ajouter" onclick="ajouterNote('biologie-notes')" style="display:none;">+</button>
-    <button class="bouton-supprimer" onclick="supprimerDerniere('biologie-notes')" style="display:none;">🗑</button>
-</div>
-
-<!-- INFO -->
-<div class="matiere" data-coef="3" id="info">
-    <h3>Info <span class="coef">(coef 3)</span></h3>
-    <div id="info-notes">
-        <input type="number" min="0" max="20">
-    </div>
-    <button class="bouton-ajouter" onclick="ajouterNote('info-notes')" style="display:none;">+</button>
-    <button class="bouton-supprimer" onclick="supprimerDerniere('info-notes')" style="display:none;">🗑</button>
-</div>
-
-<!-- CULTURE G -->
-<div class="matiere" data-coef="1.5" id="cultureg">
-    <h3>Culture G <span class="coef">(coef 1.5)</span></h3>
-    <div id="cultureg-notes">
-        <input type="number" min="0" max="20">
-    </div>
-    <button class="bouton-ajouter" onclick="ajouterNote('cultureg-notes')" style="display:none;">+</button>
-    <button class="bouton-supprimer" onclick="supprimerDerniere('cultureg-notes')" style="display:none;">🗑</button>
-</div>
-
-<!-- LV2 -->
-<div class="matiere" data-coef="1.5" id="LV2">
-    <h3>LV2 <span class="coef">(coef 1.5)</span></h3>
-    <div id="LV2-notes">
-        <input type="number" min="0" max="20">
-    </div>
-    <button class="bouton-ajouter" onclick="ajouterNote('LV2-notes')" style="display:none;">+</button>
-    <button class="bouton-supprimer" onclick="supprimerDerniere('LV2-notes')" style="display:none;">🗑</button>
-</div>
-
-<!-- ANGLAIS -->
-<div class="matiere" data-coef="1.5" id="anglais">
-    <h3>Anglais <span class="coef">(coef 1.5)</span></h3>
-    <div id="anglais-notes">
-        <input type="number" min="0" max="20">
-    </div>
-    <button class="bouton-ajouter" onclick="ajouterNote('anglais-notes')" style="display:none;">+</button>
-    <button class="bouton-supprimer" onclick="supprimerDerniere('anglais-notes')" style="display:none;">🗑</button>
-</div>
-
-<!-- SPORT -->
-<div class="matiere" data-coef="1.5" id="sport">
-    <h3>Sport <span class="coef">(coef 1.5)</span></h3>
-    <div id="sport-notes">
-        <input type="number" min="0" max="20">
-    </div>
-    <button class="bouton-ajouter" onclick="ajouterNote('sport-notes')" style="display:none;">+</button>
-    <button class="bouton-supprimer" onclick="supprimerDerniere('sport-notes')" style="display:none;">🗑</button>
-</div>
+<div id="matieres-container"></div>
 
 <button onclick="calculerMoyenne()">Calculer la moyenne générale</button>
 <h2 id="resultat"></h2>
 
 <script>
-    // --- Ajouter une note ---
-    function ajouterNote(matiereId) {
-        let div = document.getElementById(matiereId);
-        let inputs = div.querySelectorAll("input");
-        let dernierInput = inputs[inputs.length - 1];
+const matieres = [
+    {nom:"Maths", coef:7, id:"maths", ds:true, tests:true},
+    {nom:"Physique", coef:7, id:"physique"},
+    {nom:"Chimie", coef:4, id:"chimie"},
+    {nom:"Biologie", coef:3, id:"biologie"},
+    {nom:"Info", coef:3, id:"info"},
+    {nom:"Culture G", coef:1.5, id:"cultureg"},
+    {nom:"LV2", coef:1.5, id:"LV2"},
+    {nom:"Anglais", coef:1.5, id:"anglais"},
+    {nom:"Sport", coef:1.5, id:"sport"}
+];
 
-        if (dernierInput.value === "") return;
+const container = document.getElementById("matieres-container");
 
-        let input = document.createElement("input");
-        input.type = "number";
-        input.min = div.id.includes("tests") ? 0 : 0;
-        input.max = div.id.includes("tests") ? 5 : 20;
+// Génération dynamique du HTML
+matieres.forEach(m => {
+    const div = document.createElement("div");
+    div.className = "matiere";
+    div.id = m.id;
+    div.dataset.coef = m.coef;
 
-        div.appendChild(document.createElement("br"));
-        div.appendChild(input);
-
-        majBoutons(div);
+    let html = `<h3>${m.nom} <span class="coef">(coef ${m.coef})</span></h3>`;
+    
+    if(m.ds) {
+        html += `<strong>DS</strong><div id="${m.id}-controles"><input type="number" min="0" max="20"></div>
+                 <button class="bouton-ajouter" onclick="ajouterNote('${m.id}-controles')" style="display:none;">+</button>
+                 <button class="bouton-supprimer" onclick="supprimerDerniere('${m.id}-controles')" style="display:none;">🗑</button>
+                 <br><br>
+                 <strong>Tests</strong><div id="${m.id}-tests"><input type="number" min="0" max="5"></div>
+                 <button class="bouton-ajouter" onclick="ajouterNote('${m.id}-tests')" style="display:none;">+</button>
+                 <button class="bouton-supprimer" onclick="supprimerDerniere('${m.id}-tests')" style="display:none;">🗑</button>`;
+    } else {
+        html += `<div id="${m.id}-notes"><input type="number" min="0" max="20"></div>
+                 <button class="bouton-ajouter" onclick="ajouterNote('${m.id}-notes')" style="display:none;">+</button>
+                 <button class="bouton-supprimer" onclick="supprimerDerniere('${m.id}-notes')" style="display:none;">🗑</button>`;
     }
+    div.innerHTML = html;
+    container.appendChild(div);
+});
 
-    // --- Supprimer dernière note ---
-    function supprimerDerniere(matiereId) {
-        let div = document.getElementById(matiereId);
-        let inputs = div.querySelectorAll("input");
-        if (inputs.length <= 1) {
-            inputs[0].value = "";
-        } else {
-            div.removeChild(inputs[inputs.length - 1].previousSibling); // <br>
-            div.removeChild(inputs[inputs.length - 1]);
+// --- Fonctions principales ---
+function ajouterNote(id) {
+    const div = document.getElementById(id);
+    const inputs = div.querySelectorAll("input");
+    const last = inputs[inputs.length-1];
+    if(last.value==="") return;
+    const input = document.createElement("input");
+    input.type="number";
+    input.min=0;
+    input.max=id.includes("tests")?5:20;
+    div.appendChild(document.createElement("br"));
+    div.appendChild(input);
+    majBoutons(div);
+}
+
+function supprimerDerniere(id) {
+    const div = document.getElementById(id);
+    const inputs = div.querySelectorAll("input");
+    if(inputs.length<=1){ inputs[0].value=""; } 
+    else { div.removeChild(inputs[inputs.length-1].previousSibling); div.removeChild(inputs[inputs.length-1]); }
+    majBoutons(div);
+}
+
+function majBoutons(div) {
+    div.querySelectorAll("input").forEach(input=>{
+        input.addEventListener("input",()=> majBoutons(div));
+    });
+    const inputs = div.querySelectorAll("input");
+    const last = inputs[inputs.length-1];
+    const btns = div.parentNode.querySelectorAll("button");
+    btns.forEach(b=>{
+        if(b.classList.contains("bouton-ajouter") || b.classList.contains("bouton-supprimer")){
+            b.style.display = last.value!==""?"inline-block":"none";
         }
-        majBoutons(div);
-    }
-
-    // --- Moyennes ---
-    function moyenneMatiere(matiereId) {
-        let inputs = document.querySelectorAll(`#${matiereId} input`);
-        let somme = 0, count = 0;
-        inputs.forEach(input => {
-            let val = Number(input.value);
-            if (!isNaN(val)) { somme += val; count++; }
-        });
-        return count > 0 ? somme / count : 0;
-    }
-
-    function moyenneMaths() {
-        let moyenneControles = moyenneMatiere("maths-controles");
-        let moyenneTests = moyenneMatiere("maths-tests");
-        return (moyenneControles + (moyenneTests / 6)) / (1 + 1/6);
-    }
-
-    function calculerMoyenne() {
-        let moyenneGenerale = (
-            7 * moyenneMaths() +
-            7 * moyenneMatiere("physique-notes") +
-            4 * moyenneMatiere("chimie-notes") +
-            3 * moyenneMatiere("biologie-notes") +
-            3 * moyenneMatiere("info-notes") +
-            1.5 * moyenneMatiere("cultureg-notes") +
-            1.5 * moyenneMatiere("LV2-notes") +
-            1.5 * moyenneMatiere("anglais-notes") +
-            1.5 * moyenneMatiere("sport-notes")
-        ) / 30;
-
-        document.getElementById("resultat").textContent =
-            "Moyenne générale : " + moyenneGenerale.toFixed(2);
-    }
-
-    // --- Met à jour les boutons + et corbeille ---
-    function majBoutons(div) {
-        let inputs = div.querySelectorAll("input");
-        let dernierInput = inputs[inputs.length - 1];
-        let boutonAjouter = div.nextElementSibling;
-        let boutonSupprimer = boutonAjouter ? boutonAjouter.nextElementSibling : null;
-
-        if (dernierInput.value !== "") {
-            if (boutonAjouter) boutonAjouter.style.display = "inline-block";
-            if (boutonSupprimer) boutonSupprimer.style.display = "inline-block";
-        } else {
-            if (boutonAjouter) boutonAjouter.style.display = "none";
-            if (boutonSupprimer) boutonSupprimer.style.display = "none";
-        }
-    }
-
-    // --- Initialisation : ajouter events input pour chaque matière ---
-    document.querySelectorAll(".matiere div[id]").forEach(div => {
-        div.querySelectorAll("input").forEach(input => {
-            input.addEventListener("input", () => majBoutons(div));
-        });
-        majBoutons(div);
     });
+}
 
-    // --- Boutons globaux ---
-    document.getElementById("toggle-coefs").addEventListener("change", function() {
-        document.querySelectorAll(".coef").forEach(span => {
-            span.style.display = this.checked ? "inline" : "none";
-        });
-    });
+// --- Calcul de moyennes ---
+function moyenneMatiere(id) {
+    const inputs = document.querySelectorAll(`#${id} input`);
+    let somme=0,count=0;
+    inputs.forEach(i=>{ const val=Number(i.value); if(!isNaN(val)){ somme+=val; count++; }});
+    return count>0?somme/count:0;
+}
+function moyenneMaths() {
+    const mCont = moyenneMatiere("maths-controles");
+    const mTests = moyenneMatiere("maths-tests");
+    return (mCont + mTests/6)/(1+1/6);
+}
 
-    document.getElementById("toggle-notes").addEventListener("change", function() {
-        document.querySelectorAll(".matiere div[id]").forEach(div => {
-            div.classList.toggle("notes-hidden", this.checked);
-        });
-    });
+function calculerMoyenne() {
+    let mg = 7*moyenneMaths() +
+             7*moyenneMatiere("physique-notes") +
+             4*moyenneMatiere("chimie-notes") +
+             3*moyenneMatiere("biologie-notes") +
+             3*moyenneMatiere("info-notes") +
+             1.5*moyenneMatiere("cultureg-notes") +
+             1.5*moyenneMatiere("LV2-notes") +
+             1.5*moyenneMatiere("anglais-notes") +
+             1.5*moyenneMatiere("sport-notes");
+    mg /= 30;
+    document.getElementById("resultat").textContent = "Moyenne générale : "+mg.toFixed(2);
+    if(document.getElementById("toggle-bg").checked) colorerFond();
+}
 
-    document.getElementById("supprimer-tout").addEventListener("click", function() {
-        if (!confirm("Voulez-vous vraiment supprimer toutes les notes ?")) return;
-        document.querySelectorAll(".matiere div[id] input").forEach(input => input.value = "");
-        document.querySelectorAll(".matiere div[id] br").forEach(br => br.remove());
-        document.querySelectorAll(".bouton-ajouter, .bouton-supprimer").forEach(b => b.style.display = "none");
+// --- Boutons globaux ---
+document.getElementById("toggle-coefs").addEventListener("change", function(){
+    document.querySelectorAll(".coef").forEach(c=>c.style.display=this.checked?"inline":"none");
+});
+document.getElementById("toggle-notes").addEventListener("change", function(){
+    document.querySelectorAll(".matiere div[id]").forEach(d=>d.classList.toggle("notes-hidden",this.checked));
+});
+document.getElementById("supprimer-tout").addEventListener("click", function(){
+    if(!confirm("Voulez-vous vraiment supprimer toutes les notes ?")) return;
+    document.querySelectorAll(".matiere div[id] input").forEach(i=>i.value="");
+    document.querySelectorAll(".matiere div[id] br").forEach(br=>br.remove());
+    document.querySelectorAll(".bouton-ajouter, .bouton-supprimer").forEach(b=>b.style.display="none");
+});
+document.getElementById("toggle-bg").addEventListener("change", function(){
+    if(this.checked) colorerFond(); 
+    else document.querySelectorAll(".matiere").forEach(d=>d.style.background="white");
+});
+
+// --- Fonction de fond dégradé selon moyenne d'une matière ---
+function colorerFond() {
+    matieres.forEach(m=>{
+        let moyenne;
+        if(m.ds) moyenne = moyenneMaths();
+        else moyenne = moyenneMatiere(`${m.id}-notes`);
+        let color = noteToColor(moyenne);
+        document.getElementById(m.id).style.background = color;
     });
+}
+
+// --- Conversion note → couleur ---
+function noteToColor(note){
+    // 0-5 rouge->orange, 5-10 orange->vert, 10-15 vert->bleu, 15-20 bleu
+    let r=0,g=0,b=0;
+    if(note<=5){
+        r=255; g=Math.round(51*note); b=0; // 0 rouge pur -> 5 orange
+    } else if(note<=10){
+        r=Math.round(255-(25.5*(note-5))); g=255; b=0; // orange->vert
+    } else if(note<=15){
+        r=0; g=Math.round(255-(25.5*(note-10))); b=Math.round(25.5*(note-10)); // vert->bleu
+    } else {
+        r=0; g=128; b=255; // bleu vif
+    }
+    return `rgb(${r},${g},${b})`;
+}
 </script>
-
 </body>
 </html>
