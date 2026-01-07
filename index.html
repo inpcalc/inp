@@ -209,5 +209,24 @@ document.querySelectorAll(".matiere div[id]").forEach(div=>{
 
 </body>
 </html>
+ b=Math.round(255*t);
+    }
+    return `rgb(${r},${g},${b})`;
+}
+
+// --- Initialisation boutons et compteurs ---
+document.querySelectorAll(".matiere div[id]").forEach(div=>{
+    div.querySelectorAll("input").forEach(i=>i.addEventListener("input",()=>{
+        majBoutons(div);
+        majCompteur(div);
+        if(document.getElementById("toggle-bg").checked) colorerFond();
+    }));
+    majBoutons(div);
+    majCompteur(div);
+});
+</script>
+
+</body>
+</html>
 
 
