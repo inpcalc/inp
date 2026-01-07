@@ -8,8 +8,8 @@ body { font-family: Arial, sans-serif; transition: background 1s; }
 .matiere { margin-bottom: 20px; padding: 10px; border: 1px solid #ccc; width: 400px; position: relative; }
 .bouton-ajouter, .bouton-supprimer { margin-top: 5px; margin-right: 5px; }
 .coef { font-weight: bold; display: none; }
-.notes-hidden input { display: none; }
-.notes-hidden .label-ds, .notes-hidden .label-tests { display: none; }
+.notes-hidden input { display: none !important; }
+.notes-hidden .label-ds, .notes-hidden .label-tests { display: none !important; }
 .global-controls { margin-bottom: 20px; }
 .global-controls button, .global-controls label { margin-right: 10px; }
 .compteur { font-size: 0.9em; color: #555; margin-left: 10px; }
@@ -151,29 +151,29 @@ document.getElementById("toggle-coefs").addEventListener("change",function(){
     document.querySelectorAll(".coef").forEach(c=>c.style.display=this.checked?"inline":"none");
 });
 document.getElementById("toggle-notes").addEventListener("change",function(){
-    document.querySelectorAll(".matiere div[id]").forEach(d=>d.classList.toggle("notes-hidden",this.checked));
-    // Masquer DS / Tests de Maths
-    document.querySelectorAll(".label-ds, .label-tests").forEach(e=>e.style.display=this.checked?"none":"inline");
-    const res=document.getElementById("resultat");
-    res.style.display=this.checked?"none":"block";
-    if(this.checked) document.body.style.background="white";
+    const hide = this.checked;
+    document.querySelectorAll(".matiere div[id]").forEach(d=>d.classList.toggle("notes-hidden",hide));
+    document.querySelectorAll(".label-ds, .label-tests").forEach(e=>e.style.display=hide?"none":"inline");
+    document.getElementById("resultat").style.display=hide?"none":"block";
+    // Fond réinitialisé instantanément
+    document.body.style.transition="none";
+    document.body.style.background="white";
+    setTimeout(()=>{document.body.style.transition="background 1s";},0);
 });
 document.getElementById("supprimer-tout").addEventListener("click",function(){
-    if(!confirm("Voulez-vous vraiment supprimer toutes les notes ?")) return;
     document.querySelectorAll(".matiere div[id] input").forEach(i=>i.value="");
     document.querySelectorAll(".matiere div[id] br").forEach(br=>br.remove());
     document.querySelectorAll(".bouton-ajouter, .bouton-supprimer").forEach(b=>b.style.display="none");
     document.querySelectorAll(".compteur").forEach(c=>c.textContent="nb note: 0");
     document.getElementById("resultat").textContent="";
+    document.body.style.transition="none";
     document.body.style.background="white";
+    setTimeout(()=>{document.body.style.transition="background 1s";},0);
 });
 document.getElementById("toggle-bg").addEventListener("change",function(){
-    if(this.checked) {
-        const mg = parseFloat(document.getElementById("resultat").textContent.split(": ")[1]) || 0;
-        colorerFondGlobal(mg);
-    } else {
-        document.body.style.background="white";
-    }
+    const mg = parseFloat(document.getElementById("resultat").textContent.split(": ")[1]) || 0;
+    if(this.checked) colorerFondGlobal(mg);
+    else document.body.style.background="white";
 });
 
 // --- Fond dégradé global ---
@@ -191,7 +191,6 @@ function colorerFondGlobal(moyenne){
         g=Math.round(255*(1-t));
         b=Math.round(255*t);
     }
-    document.body.style.transition="background 1s";
     document.body.style.background=`rgb(${r},${g},${b})`;
 }
 
@@ -200,9 +199,7 @@ document.querySelectorAll(".matiere div[id]").forEach(div=>{
     div.querySelectorAll("input").forEach(i=>i.addEventListener("input",()=>{
         majBoutons(div);
         majCompteur(div);
-        if(document.getElementById("toggle-bg").checked) {
-            calculerMoyenne(); // recalcul + fond global
-        }
+        if(document.getElementById("toggle-bg").checked) calculerMoyenne();
     }));
     majBoutons(div);
     majCompteur(div);
@@ -211,6 +208,3 @@ document.querySelectorAll(".matiere div[id]").forEach(div=>{
 
 </body>
 </html>
-
-
-
