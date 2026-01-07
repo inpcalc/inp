@@ -30,10 +30,10 @@
     <input type="number" id="LV2"><br><br>
 
     <label>Anglais :</label>
-    <input type="number" id="Anglais"><br><br>
+    <input type="number" id="anglais"><br><br>
 
     <label>Sport :</label>
-    <input type="number" id="Sport"><br><br>
+    <input type="number" id="sport"><br><br>
 
     <button onclick="calculerMoyenne()">Calculer</button>
 
@@ -46,9 +46,13 @@
             let chimie = Number(document.getElementById("chimie").value);
             let biologie = Number(document.getElementById("biologie").value);
             let info = Number(document.getElementById("info").value);
+            let chimie = Number(document.getElementById("cultureg").value);
+            let biologie = Number(document.getElementById("LV2").value);
+            let info = Number(document.getElementById("anglais").value);
+            let info = Number(document.getElementById("sport").value);
             
 
-            let moyenne = (maths + francais + histoire) / 3;
+            let moyenne = (7*maths + 7*physique + 4*chimie + 3*biologie + 3*info + 1.5*cultureg + 1.5*LV2 + 1.5*anglais + 1.5*sport) / 30;
 
             document.getElementById("resultat").textContent =
                 "Moyenne : " + moyenne.toFixed(2);
