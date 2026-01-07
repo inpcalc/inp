@@ -6,19 +6,19 @@
 <style>
 body { font-family: Arial, sans-serif; background:white; transition: background 0.2s; }
 .global-controls { margin-bottom: 20px; display: flex; align-items: center; flex-wrap: wrap; gap:10px; opacity:1; transition: opacity 0.2s; }
-.global-controls button, .global-controls label, .display-btn { margin-right: 10px; cursor: pointer; }
+.global-controls label, .display-btn { margin-right: 10px; cursor: pointer; user-select:none; }
 #matieres-container { display: flex; flex-direction: column; gap: 20px; flex-wrap: wrap; transition: all 0.2s; }
-.matiere { margin-bottom: 20px; padding: 10px; border: 1px solid #ccc; box-sizing:border-box; opacity:1; transition: all 0.2s; }
+.matiere { margin-bottom: 20px; padding: 10px; border: 1px solid #ccc; box-sizing:border-box; transition: all 0.2s; }
 .matiere input { margin-top: 5px; }
-.bouton-ajouter, .bouton-supprimer { margin-top: 5px; margin-right: 5px; display:none; }
+.bouton-ajouter, .bouton-supprimer { margin-top: 5px; margin-right: 5px; display:none; cursor:pointer; }
 .coef { font-weight: bold; display: none; }
 .nb-notes { font-weight: normal; color: #555; display: none; margin-left: 5px; }
-.notes-hidden input { display: none !important; }
-.notes-hidden .label-ds, .notes-hidden .label-tests { display: none !important; }
+.notes-hidden { display: none !important; }
 .compteur { font-size: 0.9em; color: #555; margin-left: 10px; }
 .display-btn { padding:5px 10px; border:1px solid #ccc; background:#f0f0f0; cursor:pointer; user-select:none; }
 .display-btn.active { background:#ccc; }
-h1 { opacity:1; transition: opacity 0.2s; }
+h1 { transition: opacity 0.2s; }
+
 @media (min-width: 1200px) { .matiere.grille { width: calc(25% - 20px); } }
 @media (min-width: 900px) and (max-width: 1199px) { .matiere.grille { width: calc(33% - 20px); } }
 @media (min-width: 600px) and (max-width: 899px) { .matiere.grille { width: calc(50% - 20px); } }
@@ -130,17 +130,19 @@ function majCompteur(div){
 }
 
 // --- Moyennes ---
-function moyenneMatiere(id){
+function moyenneMatiere(id, factor=1){
     const inputs=document.querySelectorAll(`#${id} input`);
     let somme=0,count=0;
-    inputs.forEach(i=>{ const v=Number(i.value); if(!isNaN(v)) {somme+=v; count++;} });
+    inputs.forEach(i=>{ const v=Number(i.value); if(!isNaN(v)) {somme+=v*factor; count++;} });
     return count>0?somme/count:0;
 }
 function moyenneMaths(){
-    const mCont=moyenneMatiere("maths-controles");
-    const mTests=moyenneMatiere("maths-tests");
+    // DS sur 20, Tests sur 5 -> ramener sur 20
+    const mCont=moyenneMatiere("maths-controles",1);
+    const mTests=moyenneMatiere("maths-tests",4); // multiplier par 4 pour mettre sur 20
     return (mCont + mTests/6)/(1+1/6);
 }
+
 function majMoyenne(){
     let mg=7*moyenneMaths()+
            7*moyenneMatiere("physique-notes")+
@@ -173,12 +175,11 @@ toggleNotes.addEventListener("change",function(){
     this.parentNode.childNodes[1].textContent=hide?"Afficher":"Masquer";
     document.querySelectorAll(".matiere").forEach(d=>{
         d.classList.toggle("notes-hidden",hide);
-        d.style.opacity=1; // Toujours 1
     });
     document.getElementById("resultat").style.display=hide?"none":"block";
 });
 
-// --- Vider (case à cocher) ---
+// --- Vider ---
 const vider=document.getElementById("vider");
 vider.addEventListener("change",function(){
     if(this.checked){
@@ -193,6 +194,12 @@ vider.addEventListener("change",function(){
 });
 
 // --- Couleur instantanée ---
+const toggleBg=document.getElementById("toggle-bg");
+toggleBg.addEventListener("change", function(){
+    if(!this.checked) document.body.style.background="white";
+    else majMoyenne();
+});
+
 function colorerFondGlobal(moyenne){
     moyenne=Math.max(0,Math.min(20,moyenne));
     let r,g,b;
@@ -210,7 +217,7 @@ function colorerFondGlobal(moyenne){
     document.body.style.background=`rgb(${r},${g},${b})`;
 }
 
-// --- Ligne / Grille (un seul bouton qui change) ---
+// --- Ligne / Grille ---
 const displayBtn=document.getElementById("display-mode");
 let isLigne=true;
 displayBtn.addEventListener("click",()=>{
@@ -224,7 +231,7 @@ displayBtn.addEventListener("click",()=>{
             m.classList.remove("grille");
         } else {
             m.classList.add("grille");
-            m.style.width=""; // largeur gérée par CSS
+            m.style.width="";
         }
     });
 });
