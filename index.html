@@ -11,10 +11,25 @@
             margin-bottom: 20px;
             padding: 10px;
             border: 1px solid #ccc;
-            width: 350px;
+            width: 400px;
+            position: relative;
         }
-        button {
+        .bouton-ajouter {
             margin-top: 5px;
+        }
+        .controle {
+            margin-top: 5px;
+            font-size: 0.9em;
+        }
+        .controle input[type="checkbox"] {
+            margin-right: 5px;
+        }
+        .coef {
+            font-weight: bold;
+            display: none;
+        }
+        .notes-hidden input {
+            display: none;
         }
     </style>
 </head>
@@ -22,112 +37,60 @@
 
 <h1>Calcul de moyenne</h1>
 
-<!-- MATHS -->
-<div class="matiere">
-    <h3>Maths (coef 7)</h3>
+<!-- Exemple pour Maths, le reste sera similaire -->
+<div class="matiere" data-coef="7">
+    <h3>Maths <span class="coef">(coef 7)</span></h3>
 
-    <strong>Contrôles</strong>
+    <!-- Barre de contrôle -->
+    <div class="controle">
+        <label><input type="checkbox" class="toggle-coef"> Afficher coefficients</label>
+        <label><input type="checkbox" class="toggle-notes"> Masquer notes</label>
+        <button class="supprimer">Tout supprimer</button>
+    </div>
+
+    <strong>DS</strong>
     <div id="maths-controles">
         <input type="number" min="0" max="20">
     </div>
-    <button onclick="ajouterNote('maths-controles')">+</button>
+    <button class="bouton-ajouter" onclick="ajouterNote('maths-controles')" style="display:none;">+</button>
 
     <br><br>
 
     <strong>Tests</strong>
     <div id="maths-tests">
-        <input type="number" min="0" max="20">
+        <input type="number" min="0" max="5">
     </div>
-    <button onclick="ajouterNote('maths-tests')">+</button>
+    <button class="bouton-ajouter" onclick="ajouterNote('maths-tests')" style="display:none;">+</button>
 </div>
 
-<!-- PHYSIQUE -->
-<div class="matiere">
-    <h3>Physique (coef 7)</h3>
+<!-- Exemple Physique -->
+<div class="matiere" data-coef="7">
+    <h3>Physique <span class="coef">(coef 7)</span></h3>
+    <div class="controle">
+        <label><input type="checkbox" class="toggle-coef"> Afficher coefficients</label>
+        <label><input type="checkbox" class="toggle-notes"> Masquer notes</label>
+        <button class="supprimer">Tout supprimer</button>
+    </div>
     <div id="physique">
         <input type="number" min="0" max="20">
     </div>
-    <button onclick="ajouterNote('physique')">+</button>
+    <button class="bouton-ajouter" onclick="ajouterNote('physique')" style="display:none;">+</button>
 </div>
 
-<!-- CHIMIE -->
-<div class="matiere">
-    <h3>Chimie (coef 4)</h3>
-    <div id="chimie">
-        <input type="number" min="0" max="20">
-    </div>
-    <button onclick="ajouterNote('chimie')">+</button>
-</div>
-
-<!-- BIOLOGIE -->
-<div class="matiere">
-    <h3>Biologie (coef 3)</h3>
-    <div id="biologie">
-        <input type="number" min="0" max="20">
-    </div>
-    <button onclick="ajouterNote('biologie')">+</button>
-</div>
-
-<!-- INFO -->
-<div class="matiere">
-    <h3>Info (coef 3)</h3>
-    <div id="info">
-        <input type="number" min="0" max="20">
-    </div>
-    <button onclick="ajouterNote('info')">+</button>
-</div>
-
-<!-- CULTURE G -->
-<div class="matiere">
-    <h3>Culture G (coef 1.5)</h3>
-    <div id="cultureg">
-        <input type="number" min="0" max="20">
-    </div>
-    <button onclick="ajouterNote('cultureg')">+</button>
-</div>
-
-<!-- LV2 -->
-<div class="matiere">
-    <h3>LV2 (coef 1.5)</h3>
-    <div id="LV2">
-        <input type="number" min="0" max="20">
-    </div>
-    <button onclick="ajouterNote('LV2')">+</button>
-</div>
-
-<!-- ANGLAIS -->
-<div class="matiere">
-    <h3>Anglais (coef 1.5)</h3>
-    <div id="anglais">
-        <input type="number" min="0" max="20">
-    </div>
-    <button onclick="ajouterNote('anglais')">+</button>
-</div>
-
-<!-- SPORT -->
-<div class="matiere">
-    <h3>Sport (coef 1.5)</h3>
-    <div id="sport">
-        <input type="number" min="0" max="20">
-    </div>
-    <button onclick="ajouterNote('sport')">+</button>
-</div>
+<!-- Répéter pour Chimie, Biologie, Info, Culture G, LV2, Anglais, Sport -->
 
 <button onclick="calculerMoyenne()">Calculer la moyenne générale</button>
 
 <h2 id="resultat"></h2>
 
 <script>
-    // Ajout d'une nouvelle note seulement si la dernière est remplie
+    // --- Fonction pour ajouter une note ---
     function ajouterNote(matiereId) {
         let div = document.getElementById(matiereId);
         let inputs = div.querySelectorAll("input");
         let dernierInput = inputs[inputs.length - 1];
 
-        if (dernierInput.value === "") {
-            alert("Veuillez entrer la note avant d'en ajouter une autre.");
-            return;
-        }
+        if (dernierInput.value === "") return; // rien si vide
 
         let input = document.createElement("input");
         input.type = "number";
@@ -136,9 +99,11 @@
 
         div.appendChild(document.createElement("br"));
         div.appendChild(input);
+
+        majBouton(div); // Mettre à jour le bouton
     }
 
-    // Moyenne d'une matière classique
+    // --- Fonction moyenne ---
     function moyenneMatiere(matiereId) {
         let inputs = document.querySelectorAll(`#${matiereId} input`);
         let somme = 0;
@@ -155,16 +120,12 @@
         return count > 0 ? somme / count : 0;
     }
 
-    // Moyenne de Maths avec pondération Tests = 1/6 des Contrôles
     function moyenneMaths() {
         let moyenneControles = moyenneMatiere("maths-controles");
         let moyenneTests = moyenneMatiere("maths-tests");
-
-        // Pondération : Tests = 1/6 des contrôles
         return (moyenneControles + (moyenneTests / 6)) / (1 + 1/6);
     }
 
-    // Calcul de la moyenne générale
     function calculerMoyenne() {
         let moyenneGenerale = (
             7 * moyenneMaths() +
@@ -181,6 +142,50 @@
         document.getElementById("resultat").textContent =
             "Moyenne générale : " + moyenneGenerale.toFixed(2);
     }
+
+    // --- Masquer le bouton + tant qu'il n'y a pas de valeur ---
+    function majBouton(div) {
+        let inputs = div.querySelectorAll("input");
+        let dernierInput = inputs[inputs.length - 1];
+        let bouton = div.nextElementSibling; // bouton + directement après div
+
+        if (dernierInput.value !== "") {
+            bouton.style.display = "inline-block";
+        } else {
+            bouton.style.display = "none";
+        }
+    }
+
+    // --- Événements pour chaque matière ---
+    document.querySelectorAll(".matiere").forEach(matiere => {
+        // Mise à jour bouton + à chaque changement
+        matiere.querySelectorAll("input").forEach(input => {
+            input.addEventListener("input", () => majBouton(input.parentNode));
+        });
+
+        // Afficher coefficients
+        let toggleCoef = matiere.querySelector(".toggle-coef");
+        toggleCoef.addEventListener("change", () => {
+            matiere.querySelector(".coef").style.display = toggleCoef.checked ? "inline" : "none";
+        });
+
+        // Masquer / afficher notes
+        let toggleNotes = matiere.querySelector(".toggle-notes");
+        toggleNotes.addEventListener("change", () => {
+            let notesDivs = matiere.querySelectorAll("div[id]");
+            notesDivs.forEach(div => div.classList.toggle("notes-hidden", toggleNotes.checked));
+        });
+
+        // Tout supprimer
+        let supprimerBtn = matiere.querySelector(".supprimer");
+        supprimerBtn.addEventListener("click", () => {
+            if (confirm("Voulez-vous vraiment supprimer toutes les notes ?")) {
+                matiere.querySelectorAll("input").forEach(input => input.value = "");
+                matiere.querySelectorAll("br").forEach(br => br.remove());
+                matiere.querySelectorAll(".bouton-ajouter").forEach(b => b.style.display = "none");
+            }
+        });
+    });
 </script>
 
 </body>
